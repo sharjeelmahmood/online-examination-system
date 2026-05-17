@@ -11,9 +11,8 @@ This project focuses on formal verification and validation of an Online Examinat
 - GitHub Actions
 
 ## Team Members
-- Your Name
-- Member 2
-- Member 3
+- sharjeel mahmood 098
+- Abdullah malik 184
 
 ## Repository Structure
 - requirements
