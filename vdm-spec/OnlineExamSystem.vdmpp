@@ -1,0 +1,92 @@
+class OnlineExamSystem
+
+types
+
+StudentId = token;
+ExamId = token;
+Answer = seq of char;
+
+Submission ::
+    student : StudentId
+    exam    : ExamId
+    answer  : Answer;
+
+instance variables
+
+students : set of StudentId := {};
+loggedIn : set of StudentId := {};
+activeExams : map StudentId to ExamId := {|->};
+submittedExams : set of Submission := {};
+
+inv mk_OnlineExamSystem() ==
+(
+    forall s1, s2 in set submittedExams &
+    s1.student = s2.student and
+    s1.exam = s2.exam
+    =>
+    s1 = s2
+);
+
+operations
+
+public RegisterStudent : StudentId ==> ()
+RegisterStudent(sid) ==
+(
+    students := students union {sid}
+)
+pre sid not in set students
+post sid in set students;
+
+
+public Login : StudentId ==> ()
+Login(sid) ==
+(
+    loggedIn := loggedIn union {sid}
+)
+pre sid in set students and
+    sid not in set loggedIn
+post sid in set loggedIn;
+
+public StartExam : StudentId * ExamId ==> ()
+StartExam(sid,eid) ==
+(
+    activeExams := activeExams ++ {sid |-> eid}
+)
+pre sid in set loggedIn and
+    sid not in set dom activeExams
+post sid in set dom activeExams and
+     activeExams(sid) = eid;
+
+
+
+public SubmitExam : StudentId * ExamId * Answer ==> ()
+SubmitExam(sid,eid,ans) ==
+(
+    submittedExams :=
+        submittedExams union
+        {
+            mk_Submission(sid,eid,ans)
+        };
+
+    activeExams :=
+        {sid} <-: activeExams
+)
+pre sid in set dom activeExams and
+    activeExams(sid) = eid and
+    not exists sub in set submittedExams &
+        sub.student = sid and
+        sub.exam = eid
+post exists sub in set submittedExams &
+        sub.student = sid and
+        sub.exam = eid;
+
+
+public Logout : StudentId ==> ()
+Logout(sid) ==
+(
+    loggedIn := loggedIn \ {sid}
+)
+pre sid in set loggedIn
+post sid not in set loggedIn;
+
+end OnlineExamSystem
